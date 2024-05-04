@@ -76,26 +76,43 @@ def main():
     # Criar instância do disco
     disco = Disco(tamanho_bloco, trilhas, blocos_por_trilha, tempo_seek, tempo_rotacao, tempo_transferencia)
 
-    #Alocando arquivo exatamente do tamanho de um bloco.
-    bloco_inicial = disco.alocar_arquivo(512)
-    bloco_inical2 = disco.alocar_arquivo(512)
-    bloco_inical3 = disco.alocar_arquivo(513)
-    print(bloco_inicial)
-    print(bloco_inical2)
-    print(bloco_inical3)
-    print(disco.fat[0])
-    print(disco.fat[1])
-    print(disco.fat[2])
-    print(disco.fat[3])
+    print("Estado Inicial da FAT")
+    for indice, bloco in enumerate(disco.fat):
+            print(f'Bloco {indice}: {bloco}')
 
-    
-    # Lista de blocos de dados para acessar
-    #blocos = [10, 20, 30, 40, 50]
+    print("Cenário 1")
+    print("Alocando arquivo exatamente do tamanho de um bloco.")
+    bloco_alocado0 = disco.alocar_arquivo(512)
+    print("Bloco:", bloco_alocado0) # Bloco 0 alocado
 
-    # Simular leitura de blocos
-    #for bloco in blocos:
-        #latencia = disco.ler_bloco(bloco)
-        #print(f"Latência de acesso para o bloco {bloco}: {latencia} ms")
+    print("Cenário 2")
+    print("Alocando 2 arquivos exatamente do tamanho de um bloco.")
+    bloco_alocado1 = disco.alocar_arquivo(512)
+    bloco_alocado2 = disco.alocar_arquivo(512)
+    print("Bloco:", bloco_alocado1) # Bloco 1 alocado
+    print("Bloco:", bloco_alocado2) # Bloco 2 alocado
+
+    print("Cenário 3")
+    print("Alocando arquivo menor do que o tamanho de um bloco.")
+    bloco_alocado3 = disco.alocar_arquivo(100)
+    print("Bloco:", bloco_alocado3)
+    desperdicio = tamanho_bloco - 100
+    print("Desperdício:", desperdicio, "Bytes")
+
+    print("Cenário 4")
+    print("Alocando arquivo maior do que o tamanho de um bloco.")
+    blocos_alocados = disco.alocar_arquivo(513)
+    print("Blocos:", blocos_alocados) # Blocos 4 e 5 serão alocados
+    print("Desperdício:", 513 - tamanho_bloco, "Bytes")
+
+    print("Cenário 4.1")
+    print("Alocando arquivo maior do que o tamanho de um bloco, nesse caso, o ocupará todos os blocos livres restantes")
+    blocos_alocados1 = disco.alocar_arquivo(512 * 44)
+    print("Blocos:", blocos_alocados1)
+
+    print("Estado Final da FAT")
+    for indice, bloco in enumerate(disco.fat):
+            print(f'Bloco {indice}: {bloco}')
 
 if __name__ == "__main__":
     main()
