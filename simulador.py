@@ -153,7 +153,7 @@ def main():
     for indice, bloco in enumerate(disco.fat):
             print(f'Bloco {indice}: {bloco}')
 
-    print("----- Cenário 8 -----")
+    print("----- Cenário 9 -----")
     print("Alocando arquivo de tamanho 3 vezes maior que um bloco (precisará de 3 blocos e deve ser alocado nos 3 blocos disponíveis)",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512 * 3, "Bytes")
