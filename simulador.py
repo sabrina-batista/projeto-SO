@@ -1,4 +1,3 @@
-import simpy
 import math
 
 class Disco:
@@ -129,3 +128,6 @@ def main():
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
             print(f'Bloco {indice}: {bloco}')
+
+if __name__ == "__main__":
+    main()
