@@ -47,7 +47,7 @@ class Disco:
             # marca os blocos anteriores como livres novamente
                 for i in range(bloco_inicial, bloco_atual):
                     self.fat[i]["livre"] = True
-                return print("Há bloco livre na FAT, mas não o suficiente na FAT para alocar o arquivo. Todos os blocos são livres novamente.")
+                return print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo. Todos os blocos são livres novamente.")
         else:
             return print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo")
         
@@ -60,6 +60,8 @@ class Disco:
             proximo_bloco = self.fat[bloco_atual]["prox_bloco"]
             # Atualiza o bloco atual para o próximo bloco
             bloco_atual = proximo_bloco
+
+        return print("Arquivo salvo no bloco inicial", bloco_inicial, "removido")
 
 def main():
     # Configuração do disco
@@ -124,6 +126,38 @@ def main():
           "\nTamanho do arquivo:", 512, "Bytes")
     bloco_alocadoErro = disco.alocar_arquivo(512)
     print(bloco_alocadoErro)
+
+    print("----- Cenário 6 -----")
+    print("Removendo arquivo do mesmo tamanho de um bloco",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 512, "Bytes")
+    print(disco.remover_arquivo(0))
+
+    print("----- Cenário 7 -----")
+    print("Removendo arquivo de tamanho maior que um bloco",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 513, "Bytes")
+    print(disco.remover_arquivo(4))
+
+    print("===== Estado Final da FAT após Cenário 7 =====")
+    for indice, bloco in enumerate(disco.fat):
+            print(f'Bloco {indice}: {bloco}')
+
+    print("----- Cenário 8 -----")
+    print("Alocando arquivo de tamanho 4 vezes maior que um bloco (precisará de 4 blocos, porém só 3 estão livres)",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 512 * 4, "Bytes")
+    print(disco.alocar_arquivo(512 * 4))
+
+    print("===== Estado Final da FAT após Cenário 8 =====")
+    for indice, bloco in enumerate(disco.fat):
+            print(f'Bloco {indice}: {bloco}')
+
+    print("----- Cenário 8 -----")
+    print("Alocando arquivo de tamanho 3 vezes maior que um bloco (precisará de 3 blocos e deve ser alocado nos 3 blocos disponíveis)",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 512 * 3, "Bytes")
+    print(disco.alocar_arquivo(512 * 3))
 
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
