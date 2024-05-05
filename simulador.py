@@ -48,19 +48,19 @@ class Disco:
             # marca os blocos anteriores como livres novamente
                 for i in range(bloco_inicial, bloco_atual):
                     self.fat[i]["livre"] = True
-                return print("Não há espaço suficiente na FAT para alocar o arquivo. Todos os blocos são livres novamente.")
+                return print("Há bloco livre na FAT, mas não o suficiente na FAT para alocar o arquivo. Todos os blocos são livres novamente.")
         else:
-            return print("Não há espaço suficiente na FAT para alocar o arquivo")
-
-    def ler_bloco(self, bloco):
-        # Calcular a latência de acesso usando os tempos de seek, rotação e transferência
-        latencia = self.tempo_seek + self.tempo_rotacao + self.tempo_transferencia
-        return latencia
-
-    def escrever_bloco(self, bloco, dados):
-        # Calcular a latência de acesso usando os tempos de seek, rotação e transferência
-        latencia = self.tempo_seek + self.tempo_rotacao + self.tempo_transferencia
-        return latencia
+            return print("Todos os blocos da FAT estão ocupado. Não há espaço suficiente na FAT para alocar o arquivo")
+        
+    def remover_arquivo(self, bloco_inicial):
+        bloco_atual = bloco_inicial
+        while bloco_atual != -1:
+            # Libera o bloco atual, marcando-o como livre na FAT
+            self.fat[bloco_atual]["livre"] = True
+            # Obtém o índice do próximo bloco no arquivo
+            proximo_bloco = self.fat[bloco_atual]["prox_bloco"]
+            # Atualiza o bloco atual para o próximo bloco
+            bloco_atual = proximo_bloco
 
 def main():
     # Configuração do disco
@@ -122,6 +122,3 @@ def main():
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
             print(f'Bloco {indice}: {bloco}')
-
-if __name__ == "__main__":
-    main()
