@@ -26,6 +26,7 @@ class Disco:
             tamanho_restante = tamanho_arquivo
             bloco_atual = bloco_inicial
             blocos_alocados = []
+            estado_inicial = [bloco["livre"] for bloco in self.fat]
             while tamanho_restante > 0 and bloco_atual < len(self.fat):
                 if self.fat[bloco_atual]["livre"]:
                     tamanho_bloco_disponivel = self.tamanho_bloco
@@ -46,22 +47,23 @@ class Disco:
             # Se não houver espaço suficiente na FAT para alocar o arquivo
             # marca os blocos anteriores como livres novamente
                 for i in range(bloco_inicial, bloco_atual):
-                    self.fat[i]["livre"] = True
-                return print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo. Todos os blocos são livres novamente.")
+                    self.fat[i]["livre"] = estado_inicial[i]
+                return print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
         else:
-            return print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo")
+            return print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.")
         
     def remover_arquivo(self, bloco_inicial):
         bloco_atual = bloco_inicial
         while bloco_atual != -1:
+            # Configura o próximo bloco do bloco atual para -1
+            proximo_bloco = self.fat[bloco_atual]["prox_bloco"]
+            self.fat[bloco_atual]["prox_bloco"] = -1
             # Libera o bloco atual, marcando-o como livre na FAT
             self.fat[bloco_atual]["livre"] = True
-            # Obtém o índice do próximo bloco no arquivo
-            proximo_bloco = self.fat[bloco_atual]["prox_bloco"]
             # Atualiza o bloco atual para o próximo bloco
             bloco_atual = proximo_bloco
-
-        return print("Arquivo salvo no bloco inicial", bloco_inicial, "removido")
+            
+        return print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
 
 def main():
     # Configuração do disco
@@ -124,8 +126,14 @@ def main():
     print("Alocando arquivo do mesmo tamanho de um bloco, mas todos os blocos estão ocupados",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512, "Bytes")
-    bloco_alocadoErro = disco.alocar_arquivo(512)
-    print(bloco_alocadoErro)
+    espaco_insuficiente = disco.alocar_arquivo(512)
+    print(espaco_insuficiente)
+
+    print("----- Cenário 5.1 -----")
+    print("Alocando arquivo de tamanho qualquer em um cenário em que não há blocos livres.",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 328, "Bytes")
+    print(disco.alocar_arquivo(328))
 
     print("----- Cenário 6 -----")
     print("Removendo arquivo do mesmo tamanho de um bloco",
@@ -157,7 +165,19 @@ def main():
     print("Alocando arquivo de tamanho 3 vezes maior que um bloco (precisará de 3 blocos e deve ser alocado nos 3 blocos disponíveis)",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512 * 3, "Bytes")
-    print(disco.alocar_arquivo(512 * 3))
+    print("Blocos", disco.alocar_arquivo(512 * 3), "alocados")
+
+    print("----- Cenário 10 -----")
+    print("Removendo arquivo de tamanho menor que um bloco",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 100, "Bytes")
+    print(disco.remover_arquivo(3))
+
+    print("----- Cenário 11 -----")
+    print("Removendo arquivo de tamanho 44 vezes maior que um bloco (remoção de arquivo que consome mais da metade dos blocos)",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 512 * 44, "Bytes")
+    print(disco.remover_arquivo(6))
 
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
