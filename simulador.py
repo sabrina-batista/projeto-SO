@@ -50,7 +50,7 @@ class Disco:
                     self.fat[i]["livre"] = True
                 return print("Há bloco livre na FAT, mas não o suficiente na FAT para alocar o arquivo. Todos os blocos são livres novamente.")
         else:
-            return print("Todos os blocos da FAT estão ocupado. Não há espaço suficiente na FAT para alocar o arquivo")
+            return print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo")
         
     def remover_arquivo(self, bloco_inicial):
         bloco_atual = bloco_inicial
@@ -118,6 +118,13 @@ def main():
           "\nTamanho do arquivo:", 512 * 44, "Bytes")
     blocos_alocados1 = disco.alocar_arquivo(512 * 44)
     print("Blocos", blocos_alocados1, "alocados")
+
+    print("----- Cenário 5 -----")
+    print("Alocando arquivo do mesmo tamanho de um bloco, mas todos os blocos estão ocupados",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo:", 512, "Bytes")
+    bloco_alocadoErro = disco.alocar_arquivo(512)
+    print(bloco_alocadoErro)
 
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
