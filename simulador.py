@@ -93,7 +93,7 @@ class Disco:
             self.fat[bloco_atual]["livre"] = True
             # Atualiza o bloco atual para o próximo bloco
             bloco_atual = proximo_bloco
-        return bloco_inicial
+        return None
 
 def main():
     tamanho_bloco = 512 
@@ -173,15 +173,15 @@ def main():
     print("Removendo arquivo do mesmo tamanho de um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512, "Bytes")
-    bloco_inicial = disco.remover_arquivo(0)
-    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
+    disco.remover_arquivo(0)
+    print("Arquivo salvo no bloco inicial 0 removido.")
 
     print("----- Cenário 7 -----")
     print("Removendo arquivo de tamanho maior que um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 513, "Bytes")
-    bloco_inicial = disco.remover_arquivo(4)
-    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
+    disco.remover_arquivo(4)
+    print("Arquivo salvo no bloco inicial 4 removido.")
 
     print("===== Estado Final da FAT após Cenário 7 =====")
     for indice, bloco in enumerate(disco.fat):
@@ -210,15 +210,15 @@ def main():
     print("Removendo arquivo de tamanho menor que um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 100, "Bytes")
-    bloco_inicial = disco.remover_arquivo(3)
-    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
+    disco.remover_arquivo(3)
+    print("Arquivo salvo no bloco inicial 3 removido.")
 
     print("----- Cenário 11 -----")
     print("Removendo arquivo de tamanho 44 vezes maior que um bloco (remoção de arquivo que consome mais da metade dos blocos)",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512 * 44, "Bytes")
-    bloco_inicial = disco.remover_arquivo(6)
-    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
+    disco.remover_arquivo(6)
+    print("Arquivo salvo no bloco inicial 6 removido.")
 
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
