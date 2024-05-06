@@ -1,7 +1,16 @@
-import math
-
 class Disco:
     def __init__(self, tamanho_bloco, trilhas, blocos_por_trilha, tempo_seek, tempo_rotacao, tempo_transferencia):
+        """
+        Inicializa o disco com os parâmetros especificados.
+
+        Args:
+        tamanho_bloco (int): Tamanho de cada bloco em bytes.
+        trilhas (int): Número de trilhas no disco.
+        blocos_por_trilha (int): Número de blocos por trilha.
+        tempo_seek (float): Tempo médio de busca (em ms).
+        tempo_rotacao (float): Tempo médio de rotação (em ms).
+        tempo_transferencia (float): Tempo médio de transferência (em ms).
+        """
         self.tamanho_bloco = tamanho_bloco
         self.trilhas = trilhas
         self.blocos_por_trilha = blocos_por_trilha
@@ -11,16 +20,30 @@ class Disco:
         self.fat = [{"livre": True, "prox_bloco": -1} for _ in range(trilhas * blocos_por_trilha)] # Inicializando a FAT com cada entrada representando um bloco livre e apontando para -1
 
     def encontrar_bloco_livre(self):
-        # Encontra o primeiro bloco livre que possa acomodar o tamanho do arquivo
+        """
+        Encontra o primeiro bloco livre na FAT.
+
+        Returns:
+        int: Índice do primeiro bloco livre encontrado. Retorna -1 se não houver blocos livres.
+        """
         bloco_livre = -1
         for i, bloco in enumerate(self.fat):
-            if bloco["livre"]:  # Verifica se o bloco está livre
+            if bloco["livre"]: 
                 bloco_livre = i
                 break
         return bloco_livre
     
     def alocar_arquivo(self, tamanho_arquivo):
-         #Aloca um arquivo na FAT usando o método First Fit
+        """
+        Aloca um arquivo na FAT usando o método First Fit.
+
+        Args:
+        tamanho_arquivo (int): Tamanho do arquivo em bytes.
+
+        Returns:
+        list: Lista de índices dos blocos alocados para o arquivo.
+        None: Retorna None se não houver espaço suficiente na FAT.
+        """
         bloco_inicial = self.encontrar_bloco_livre()
         if bloco_inicial != -1:
             tamanho_restante = tamanho_arquivo
@@ -48,11 +71,19 @@ class Disco:
             # marca os blocos anteriores como livres novamente
                 for i in range(bloco_inicial, bloco_atual):
                     self.fat[i]["livre"] = estado_inicial[i]
-                return print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
+                print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
+                return None 
         else:
-            return print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.")
+            print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.")
+            return None 
         
     def remover_arquivo(self, bloco_inicial):
+        """
+        Remove um arquivo da FAT, liberando os blocos alocados.
+
+        Args:
+        bloco_inicial (int): Índice do bloco inicial do arquivo.
+        """
         bloco_atual = bloco_inicial
         while bloco_atual != -1:
             # Configura o próximo bloco do bloco atual para -1
@@ -62,19 +93,16 @@ class Disco:
             self.fat[bloco_atual]["livre"] = True
             # Atualiza o bloco atual para o próximo bloco
             bloco_atual = proximo_bloco
-            
-        return print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
+        return bloco_inicial
 
 def main():
-    # Configuração do disco
-    tamanho_bloco = 512 #bytes
+    tamanho_bloco = 512 
     trilhas = 5
     blocos_por_trilha = 10
-    tempo_seek = 5 #milisegundos
+    tempo_seek = 5
     tempo_rotacao = 10 
     tempo_transferencia = 2
 
-    # Criar instância do disco
     disco = Disco(tamanho_bloco, trilhas, blocos_por_trilha, tempo_seek, tempo_rotacao, tempo_transferencia)
 
     print("===== Estado Inicial da FAT =====")
@@ -113,7 +141,8 @@ def main():
           "\nTamanho do arquivo:", 513, "Bytes")
     blocos_alocados = disco.alocar_arquivo(513)
     print("Blocos", blocos_alocados, "alocados") # Blocos 4 e 5 serão alocados
-    print("Desperdício de", 513 - tamanho_bloco, "Bytes")
+    desperdicio = tamanho_bloco - 1
+    print("Desperdício de", desperdicio, "Bytes")
 
     print("----- Cenário 4.1 -----")
     print("Alocando arquivo maior do que o tamanho de um bloco, nesse caso, o ocupará todos os blocos livres restantes",
@@ -139,13 +168,15 @@ def main():
     print("Removendo arquivo do mesmo tamanho de um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512, "Bytes")
-    print(disco.remover_arquivo(0))
+    bloco_inicial = disco.remover_arquivo(0)
+    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
 
     print("----- Cenário 7 -----")
     print("Removendo arquivo de tamanho maior que um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 513, "Bytes")
-    print(disco.remover_arquivo(4))
+    bloco_inicial = disco.remover_arquivo(4)
+    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
 
     print("===== Estado Final da FAT após Cenário 7 =====")
     for indice, bloco in enumerate(disco.fat):
@@ -171,13 +202,15 @@ def main():
     print("Removendo arquivo de tamanho menor que um bloco",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 100, "Bytes")
-    print(disco.remover_arquivo(3))
+    bloco_inicial = disco.remover_arquivo(3)
+    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
 
     print("----- Cenário 11 -----")
     print("Removendo arquivo de tamanho 44 vezes maior que um bloco (remoção de arquivo que consome mais da metade dos blocos)",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512 * 44, "Bytes")
-    print(disco.remover_arquivo(6))
+    bloco_inicial = disco.remover_arquivo(6)
+    print("Arquivo salvo no bloco inicial", bloco_inicial, "removido.")
 
     print("===== Estado Final da FAT =====")
     for indice, bloco in enumerate(disco.fat):
