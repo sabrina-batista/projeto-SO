@@ -42,7 +42,9 @@ class Disco:
 
         Returns:
         list: Lista de índices dos blocos alocados para o arquivo.
-        None: Retorna None se não houver espaço suficiente na FAT.
+        
+        Raises:
+        ValueError: Se não houver espaço suficiente na FAT para alocar o arquivo.
         """
         bloco_inicial = self.encontrar_bloco_livre()
         if bloco_inicial != -1:
@@ -71,11 +73,9 @@ class Disco:
             # marca os blocos anteriores como livres novamente
                 for i in range(bloco_inicial, bloco_atual):
                     self.fat[i]["livre"] = estado_inicial[i]
-                print("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
-                return None 
+                raise ValueError("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
         else:
-            print("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.")
-            return None 
+            raise ValueError("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.") 
         
     def remover_arquivo(self, bloco_inicial):
         """
@@ -155,14 +155,19 @@ def main():
     print("Alocando arquivo do mesmo tamanho de um bloco, mas todos os blocos estão ocupados",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512, "Bytes")
-    espaco_insuficiente = disco.alocar_arquivo(512)
-    print(espaco_insuficiente)
+    try:
+         disco.alocar_arquivo(512)
+    except ValueError as erro:
+         print(erro)
 
     print("----- Cenário 5.1 -----")
     print("Alocando arquivo de tamanho qualquer em um cenário em que não há blocos livres.",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 328, "Bytes")
-    print(disco.alocar_arquivo(328))
+    try:
+         disco.alocar_arquivo(328)
+    except ValueError as erro:
+         print(erro)
 
     print("----- Cenário 6 -----")
     print("Removendo arquivo do mesmo tamanho de um bloco",
@@ -186,7 +191,10 @@ def main():
     print("Alocando arquivo de tamanho 4 vezes maior que um bloco (precisará de 4 blocos, porém só 3 estão livres)",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo:", 512 * 4, "Bytes")
-    print(disco.alocar_arquivo(512 * 4))
+    try:
+         disco.alocar_arquivo(512 * 4)
+    except ValueError as erro:
+         print(erro)
 
     print("===== Estado Final da FAT após Cenário 8 =====")
     for indice, bloco in enumerate(disco.fat):
