@@ -47,36 +47,74 @@ class Disco:
         ValueError: Se não houver espaço suficiente na FAT para alocar o arquivo.
         """
         bloco_inicial = self.encontrar_bloco_livre()
-        if bloco_inicial != -1:
-            tamanho_restante = tamanho_arquivo
-            bloco_atual = bloco_inicial
-            blocos_alocados = []
-            estado_inicial = [bloco["livre"] for bloco in self.fat]
-            while tamanho_restante > 0 and bloco_atual < len(self.fat):
-                if self.fat[bloco_atual]["livre"]:
-                    tamanho_bloco_disponivel = self.tamanho_bloco
-                    tamanho_a_alocar = min(tamanho_restante, tamanho_bloco_disponivel)
-                    self.fat[bloco_atual]["livre"] = False
-                    tamanho_restante -= tamanho_a_alocar
-                    blocos_alocados.append(bloco_atual)
-                bloco_atual += 1
+        
+        if bloco_inicial == -1:
+             raise ValueError("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.")
+        
+        tamanho_restante = tamanho_arquivo
+        bloco_atual = bloco_inicial
+        blocos_alocados = []
+        estado_inicial = [{"livre": bloco["livre"], "prox_bloco": bloco["prox_bloco"]} for bloco in self.fat]
+        
+        while tamanho_restante > 0 and bloco_atual < len(self.fat):
+            bloco_atual, tamanho_restante, blocos_alocados = self._alocar_bloco(bloco_atual, tamanho_restante, blocos_alocados)
             
-            if len(blocos_alocados) > 1:
-                for i in range(len(blocos_alocados) - 1):
-                    self.fat[blocos_alocados[i]]["prox_bloco"] = blocos_alocados[i + 1]
-
-            # Verifica se o arquivo foi alocado completamente
-            if tamanho_restante == 0:
-                return blocos_alocados
-            else:
+        if len(blocos_alocados) > 1:
+            self._atualizar_fat_com_prox_bloco(blocos_alocados)
+            
+        # Verifica se o arquivo foi alocado completamente
+        if tamanho_restante == 0:
+            return blocos_alocados
+        else:
             # Se não houver espaço suficiente na FAT para alocar o arquivo
             # marca os blocos anteriores como livres novamente
-                for i in range(bloco_inicial, bloco_atual):
-                    self.fat[i]["livre"] = estado_inicial[i]
-                raise ValueError("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
-        else:
-            raise ValueError("Todos os blocos da FAT estão ocupados. Não há espaço suficiente na FAT para alocar o arquivo.") 
+            self._resetar_blocos_iniciais(bloco_inicial, bloco_atual, estado_inicial)
+            raise ValueError("Há bloco livre na FAT, mas não o suficiente para alocar o arquivo.")
+             
         
+    def _alocar_bloco(self, bloco_atual, tamanho_restante, blocos_alocados):
+        """
+        Aloca um bloco para o arquivo e atualiza os valores de bloco_atual, tamanho_restante e blocos_alocados.
+
+        Args:
+        bloco_atual (int): Índice do bloco atual.
+        tamanho_restante (int): Tamanho do arquivo restante a ser alocado.
+        blocos_alocados (list): Lista de índices dos blocos alocados para o arquivo.
+
+        Returns:
+        tuple: (bloco_atual, tamanho_restante, blocos_alocados)
+        """
+        if self.fat[bloco_atual]["livre"]:
+            tamanho_bloco_disponivel = self.tamanho_bloco
+            tamanho_a_alocar = min(tamanho_restante, tamanho_bloco_disponivel)
+            self.fat[bloco_atual]["livre"] = False
+            tamanho_restante -= tamanho_a_alocar
+            blocos_alocados.append(bloco_atual)
+        return bloco_atual + 1, tamanho_restante, blocos_alocados
+    
+    def _atualizar_fat_com_prox_bloco(self, blocos_alocados):
+        """
+        Atualiza a FAT com os índices dos blocos alocados como próximos blocos.
+
+        Args:
+        blocos_alocados (list): Lista de índices dos blocos alocados para o arquivo.
+        """
+        for i in range(len(blocos_alocados) - 1):
+            self.fat[blocos_alocados[i]]["prox_bloco"] = blocos_alocados[i + 1]
+
+    def _resetar_blocos_iniciais(self, bloco_inicial, bloco_atual, estado_inicial):
+        """
+        Marca os blocos anteriores como livres novamente e atualiza os próximos blocos na FAT para -1.
+
+        Args:
+        bloco_inicial (int): Índice do bloco inicial.
+        bloco_atual (int): Índice do bloco atual.
+        estado_inicial (list): Estado inicial dos blocos na FAT.
+        """
+        for i in range(bloco_inicial, bloco_atual):
+            self.fat[i]["livre"] = estado_inicial[i]["livre"]
+            self.fat[i]["prox_bloco"] = estado_inicial[i]["prox_bloco"]
+    
     def remover_arquivo(self, bloco_inicial):
         """
         Remove um arquivo da FAT, liberando os blocos alocados.
@@ -168,6 +206,10 @@ def main():
          disco.alocar_arquivo(328)
     except ValueError as erro:
          print(erro)
+
+    print("===== Estado Final da FAT após Cenário 5.1 =====")
+    for indice, bloco in enumerate(disco.fat):
+            print(f'Bloco {indice}: {bloco}')
 
     print("----- Cenário 6 -----")
     print("Removendo arquivo do mesmo tamanho de um bloco",
