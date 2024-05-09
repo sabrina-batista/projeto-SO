@@ -132,6 +132,13 @@ class Disco:
             # Atualiza o bloco atual para o próximo bloco
             bloco_atual = proximo_bloco
         return None
+    
+    def exibir_estado_fat(self):
+        """
+        Exibe o estado atual da FAT
+        """
+        for indice, bloco in enumerate(self.fat):
+            print(f'Bloco {indice}: {bloco}')
 
 def main():
     tamanho_bloco = 512 
@@ -143,9 +150,12 @@ def main():
 
     disco = Disco(tamanho_bloco, trilhas, blocos_por_trilha, tempo_seek, tempo_rotacao, tempo_transferencia)
 
+    """
+    Estado atual da FAT
+    """
     print("===== Estado Inicial da FAT =====")
-    for indice, bloco in enumerate(disco.fat):
-            print(f'Bloco {indice}: {bloco}')
+    disco.exibir_estado_fat()
+    
 
     print("----- Cenário 1 -----")
     print("Alocando arquivo exatamente do tamanho de um bloco.",
@@ -153,6 +163,7 @@ def main():
           "\nTamanho do arquivo:", 512, "Bytes")
     bloco_alocado0 = disco.alocar_arquivo(512)
     print("Bloco", bloco_alocado0, "alocado.") # Bloco 0 alocado
+    disco.exibir_estado_fat()
 
     print("----- Cenário 2 -----")
     print("Alocando 2 arquivos exatamente do tamanho de um bloco.",
