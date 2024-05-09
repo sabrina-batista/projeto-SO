@@ -133,6 +133,24 @@ class Disco:
             bloco_atual = proximo_bloco
         return None
     
+    def calcular_fragmentacao_interna(self):
+        """
+        Calcula a fragmentação interna do disco, que é a quantidade total de espaço desperdiçado nos blocos
+        devido à alocação de arquivos que não preenchem completamente um bloco.
+        Returns:
+        int: A quantidade total de espaço desperdiçado devido à fragmentação interna, em bytes.
+        """
+        fragmentacao_interna = 0
+        for bloco in self.fat:
+            if not bloco["livre"]:
+                tamanho_arquivo = self.tamanho_bloco
+                bloco_atual = bloco["prox_bloco"]
+                while bloco_atual != -1:
+                    tamanho_arquivo += self.tamanho_bloco
+                    bloco_atual = self.fat[bloco_atual]["prox_bloco"]
+                fragmentacao_interna += self.tamanho_bloco - tamanho_arquivo % self.tamanho_bloco
+        return fragmentacao_interna
+    
     def exibir_estado_fat(self):
         """
         Exibe o estado atual da FAT
@@ -141,141 +159,42 @@ class Disco:
             print(f'Bloco {indice}: {bloco}')
 
 def main():
-    tamanho_bloco = 512 
-    trilhas = 5
-    blocos_por_trilha = 10
+    tamanho_bloco = 4000 
+    trilhas = 4
+    blocos_por_trilha = 16
     tempo_seek = 5
     tempo_rotacao = 10 
     tempo_transferencia = 2
 
     disco = Disco(tamanho_bloco, trilhas, blocos_por_trilha, tempo_seek, tempo_rotacao, tempo_transferencia)
 
-    """
-    Estado atual da FAT
-    """
-    print("===== Estado Inicial da FAT =====")
-    disco.exibir_estado_fat()
-    
-
-    print("----- Cenário 1 -----")
-    print("Alocando arquivo exatamente do tamanho de um bloco.",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512, "Bytes")
-    bloco_alocado0 = disco.alocar_arquivo(512)
-    print("Bloco", bloco_alocado0, "alocado.") # Bloco 0 alocado
+# SIMULAÇÕES
+    print("----- Estado Inicial da FAT -----")
     disco.exibir_estado_fat()
 
-    print("----- Cenário 2 -----")
-    print("Alocando 2 arquivos exatamente do tamanho de um bloco.",
+    print("===== Cenário 0 =====")
+    print("----- Estado Atual da FAT -----")
+    print("Alocando arquivos de tamanhos variados.",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo 1:", 512, "Bytes",
-          "\nTamanho do arquivo 2:", 512, "Bytes")
-    bloco_alocado1 = disco.alocar_arquivo(512)
-    bloco_alocado2 = disco.alocar_arquivo(512)
-    print("Bloco", bloco_alocado1, "alocado") # Bloco 1 alocado
-    print("Bloco", bloco_alocado2, "alocado") # Bloco 2 alocado
+          "\nTamanho do arquivo A:", 4000, "Bytes",
+          "\nTamanho do arquivo B:", 16000, "Bytes",
+          "\nTamanho do arquivo C:", 36000, "Bytes")
+    bloco_alocadoA = disco.alocar_arquivo(4000)
+    bloco_alocadoB = disco.alocar_arquivo(16000)
+    bloco_alocadoC = disco.alocar_arquivo(36000)
+    print("Blocos", bloco_alocadoA, bloco_alocadoB, bloco_alocadoC, "alocados.")
+    #disco.calcular_fragmentacao_interna()
+    disco.exibir_estado_fat()
 
-    print("----- Cenário 3 -----")
-    print("Alocando arquivo menor do que o tamanho de um bloco.",
+    print("===== Cenário 1 =====")
+    print("----- Estado Atual da FAT -----")
+    print("Alocando arquivo D de tamanho 3.6 KB.",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 100, "Bytes")
-    bloco_alocado3 = disco.alocar_arquivo(100)
-    print("Bloco", bloco_alocado3, "alocado") # Bloco 3 alocado
-    desperdicio = tamanho_bloco - 100
-    print("Desperdício de", desperdicio, "Bytes")
-
-    print("----- Cenário 4 -----")
-    print("Alocando arquivo maior do que o tamanho de um bloco.",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 513, "Bytes")
-    blocos_alocados = disco.alocar_arquivo(513)
-    print("Blocos", blocos_alocados, "alocados") # Blocos 4 e 5 serão alocados
-    desperdicio = tamanho_bloco - 1
-    print("Desperdício de", desperdicio, "Bytes")
-
-    print("----- Cenário 4.1 -----")
-    print("Alocando arquivo maior do que o tamanho de um bloco, nesse caso, o ocupará todos os blocos livres restantes",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512 * 44, "Bytes")
-    blocos_alocados1 = disco.alocar_arquivo(512 * 44)
-    print("Blocos", blocos_alocados1, "alocados")
-
-    print("----- Cenário 5 -----")
-    print("Alocando arquivo do mesmo tamanho de um bloco, mas todos os blocos estão ocupados",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512, "Bytes")
-    try:
-         disco.alocar_arquivo(512)
-    except ValueError as erro:
-         print(erro)
-
-    print("----- Cenário 5.1 -----")
-    print("Alocando arquivo de tamanho qualquer em um cenário em que não há blocos livres.",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 328, "Bytes")
-    try:
-         disco.alocar_arquivo(328)
-    except ValueError as erro:
-         print(erro)
-
-    print("===== Estado Final da FAT após Cenário 5.1 =====")
-    for indice, bloco in enumerate(disco.fat):
-            print(f'Bloco {indice}: {bloco}')
-
-    print("----- Cenário 6 -----")
-    print("Removendo arquivo do mesmo tamanho de um bloco",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512, "Bytes")
-    disco.remover_arquivo(0)
-    print("Arquivo salvo no bloco inicial 0 removido.")
-
-    print("----- Cenário 7 -----")
-    print("Removendo arquivo de tamanho maior que um bloco",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 513, "Bytes")
-    disco.remover_arquivo(4)
-    print("Arquivo salvo no bloco inicial 4 removido.")
-
-    print("===== Estado Final da FAT após Cenário 7 =====")
-    for indice, bloco in enumerate(disco.fat):
-            print(f'Bloco {indice}: {bloco}')
-
-    print("----- Cenário 8 -----")
-    print("Alocando arquivo de tamanho 4 vezes maior que um bloco (precisará de 4 blocos, porém só 3 estão livres)",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512 * 4, "Bytes")
-    try:
-         disco.alocar_arquivo(512 * 4)
-    except ValueError as erro:
-         print(erro)
-
-    print("===== Estado Final da FAT após Cenário 8 =====")
-    for indice, bloco in enumerate(disco.fat):
-            print(f'Bloco {indice}: {bloco}')
-
-    print("----- Cenário 9 -----")
-    print("Alocando arquivo de tamanho 3 vezes maior que um bloco (precisará de 3 blocos e deve ser alocado nos 3 blocos disponíveis)",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512 * 3, "Bytes")
-    print("Blocos", disco.alocar_arquivo(512 * 3), "alocados")
-
-    print("----- Cenário 10 -----")
-    print("Removendo arquivo de tamanho menor que um bloco",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 100, "Bytes")
-    disco.remover_arquivo(3)
-    print("Arquivo salvo no bloco inicial 3 removido.")
-
-    print("----- Cenário 11 -----")
-    print("Removendo arquivo de tamanho 44 vezes maior que um bloco (remoção de arquivo que consome mais da metade dos blocos)",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo:", 512 * 44, "Bytes")
-    disco.remover_arquivo(6)
-    print("Arquivo salvo no bloco inicial 6 removido.")
-
-    print("===== Estado Final da FAT =====")
-    for indice, bloco in enumerate(disco.fat):
-            print(f'Bloco {indice}: {bloco}')
+          "\nTamanho do arquivo D:", 3600, "Bytes",)
+    bloco_alocadoD = disco.alocar_arquivo(3600)
+    print("Bloco", bloco_alocadoD,"alocado.")
+    #disco.calcular_fragmentacao_interna()
+    disco.exibir_estado_fat()
 
 if __name__ == "__main__":
     main()
