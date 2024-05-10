@@ -133,6 +133,7 @@ class Disco:
             bloco_atual = proximo_bloco
         return None
     
+
     def calcular_espaco_livre_fragmentado(self):
         """
         Calcula o espaço livre fragmentado no disco, que é a quantidade total de espaço livre disponível
@@ -191,9 +192,9 @@ def main():
     print("Alocando arquivos de tamanhos variados.",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
           "\nTamanho do arquivo A:", 4000, "Bytes",
-          "\nTamanho do arquivo B:", 13000, "Bytes",
+          "\nTamanho do arquivo B:", 12000, "Bytes",
           "\nTamanho do arquivo C:", 24000, "Bytes",
-          "\nTamanho do arquivo D:", 55000, "Bytes")
+          "\nTamanho do arquivo D:", 54000, "Bytes")
     bloco_alocadoA = disco.alocar_arquivo(4000)
     bloco_alocadoB = disco.alocar_arquivo(13000)
     bloco_alocadoC = disco.alocar_arquivo(24000)
@@ -201,61 +202,52 @@ def main():
     print("Blocos", bloco_alocadoA, bloco_alocadoB, bloco_alocadoC, bloco_alocadoD, "alocados.")
     disco.exibir_estado_fat()
 
-    print("Removendo arquivo B e D.",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo B:", 13000, "Bytes",
-          "\nTamanho do arquivo D:", 55000, "Bytes")
-    disco.remover_arquivo(1)
-    disco.remover_arquivo(5)
-    print("Arquivo salvo no bloco inicial 1 removido.")
-    print("Arquivo salvo no bloco inicial 5 removido.")
-    disco.exibir_estado_fat()
-
-    espaco_fragmentado0 = disco.calcular_espaco_livre_fragmentado()
-    print("Espaço Livre Fragmentado:", espaco_fragmentado0)
-    taxa_fragmentacao0 = disco.calcular_taxa_fragmentacao()
-    print("Taxa de Fragmentação:", taxa_fragmentacao0)
 
     #CENÁRIO 1
     print("===== Cenário 1 =====")
     print("----- Estado Atual da FAT -----")
-    print("Alocando arquivo E e F de tamanhos 15 KB e 57 KB, respectivamente",
+    print("Alocando arquivo E, F e G de tamanhos 3.6 KB, 15 KB e 57 KB, respectivamente",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo E:", 15000, "Bytes",
-          "\nTamanho do arquivo F:", 57000, "Bytes")
-    bloco_alocadoE = disco.alocar_arquivo(15000)
-    bloco_alocadoF = disco.alocar_arquivo(57000)
-    print("Blocos", bloco_alocadoE, bloco_alocadoF, "alocados.")
+          "\nTamanho do arquivo E:", 3600, "Bytes",
+          "\nTamanho do arquivo F:", 15000, "Bytes",
+          "\nTamanho do arquivo G:", 57000, "Bytes")
+    bloco_alocadoE = disco.alocar_arquivo(3600)
+    bloco_alocadoF = disco.alocar_arquivo(15000)
+    bloco_alocadoG = disco.alocar_arquivo(57000)
+    print("Blocos", bloco_alocadoE, bloco_alocadoF, bloco_alocadoG, "alocados.")
     disco.exibir_estado_fat()
 
-    espaco_fragmentado1 = disco.calcular_espaco_livre_fragmentado()
-    print("Espaço Livre Fragmentado:", espaco_fragmentado1)
+    print("Removendo arquivos B e E.",
+          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
+          "\nTamanho do arquivo B:", 12000, "Bytes",
+          "\nTamanho do arquivo E:", 3600, "Bytes")
+    disco.remover_arquivo(1) 
+    disco.remover_arquivo(25)
+    print("Arquivo salvo no bloco inicial 1 removido.")
+    print("Arquivo salvo no bloco inicial 25 removido.")
+    disco.exibir_estado_fat()
+
+    #FRAGMENTAÇAO DO SISTEMA DE ARQUIVOS
     taxa_fragmentacao1 = disco.calcular_taxa_fragmentacao()
-    print("Taxa de Fragmentação:", taxa_fragmentacao1)
+    print(f'Taxa de Fragmentação: {taxa_fragmentacao1:.2f}%')
+
+
 
     #CENÁRIO 2
     print("===== Cenário 2 =====")
-    print("Removendo arquivo E e F.",
-          "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo E:", 13000, "Bytes",
-          "\nTamanho do arquivo F:", 55000, "Bytes")
-    disco.remover_arquivo(1)
-    disco.remover_arquivo(5)
-    print("Arquivo salvo no bloco inicial 1 removido.")
-    print("Arquivo salvo no bloco inicial 5 removido.")
-
     print("----- Estado Atual da FAT -----")
-    print("Alocando arquivo G de tamanho 3.6 KB.",
+    print("Alocando arquivos H e I de tamanhos 8 KB e 18 KB, respectivamente.",
           "\nTamanho do bloco:", tamanho_bloco, "Bytes",
-          "\nTamanho do arquivo G:", 3600, "Bytes",)
-    bloco_alocadoE = disco.alocar_arquivo(3600)
-    print("Bloco", bloco_alocadoE,"alocado.")
+          "\nTamanho do arquivo H:", 8000, "Bytes",
+          "\nTamanho do arquivo I:", 18000, "Bytes")
+    bloco_alocadoH = disco.alocar_arquivo(8000)
+    bloco_alocadoI = disco.alocar_arquivo(18000)
+    print("Blocos", bloco_alocadoH, bloco_alocadoI, "alocados.")
     disco.exibir_estado_fat()
 
-    espaco_fragmentado = disco.calcular_espaco_livre_fragmentado()
-    print("Espaço Livre Fragmentado:", espaco_fragmentado)
-    taxa_fragmentacao = disco.calcular_taxa_fragmentacao()
-    print("Taxa de Fragmentação:", taxa_fragmentacao)
+    #FRAGMENTAÇAO DO SISTEMA DE ARQUIVOS
+    taxa_fragmentacao2 = disco.calcular_taxa_fragmentacao()
+    print(f'Taxa de Fragmentação: {taxa_fragmentacao2:.2f}%')
     
 
 if __name__ == "__main__":
