@@ -244,10 +244,6 @@ def main():
     bloco_alocadoI = disco.alocar_arquivo(18000)
     print("Blocos", bloco_alocadoH, bloco_alocadoI, "alocados.")
     disco.exibir_estado_fat()
-
-    #FRAGMENTAÇAO DO SISTEMA DE ARQUIVOS
-    taxa_fragmentacao2 = disco.calcular_taxa_fragmentacao()
-    print(f'Taxa de Fragmentação: {taxa_fragmentacao2:.2f}%')
     
 
 if __name__ == "__main__":
