@@ -194,7 +194,7 @@ def main():
           "\nTamanho do arquivo A:", 4000, "Bytes",
           "\nTamanho do arquivo B:", 12000, "Bytes",
           "\nTamanho do arquivo C:", 24000, "Bytes",
-          "\nTamanho do arquivo D:", 54000, "Bytes")
+          "\nTamanho do arquivo D:", 56000, "Bytes")
     bloco_alocadoA = disco.alocar_arquivo(4000)
     bloco_alocadoB = disco.alocar_arquivo(13000)
     bloco_alocadoC = disco.alocar_arquivo(24000)
